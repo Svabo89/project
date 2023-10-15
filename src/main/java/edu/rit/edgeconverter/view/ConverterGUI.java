@@ -1,7 +1,12 @@
 package edu.rit.edgeconverter.view;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
+
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -75,22 +80,42 @@ public class ConverterGUI {
         menuSaveAs,
         menuExit
       );
-    menuOpenEdgeFile.setOnAction(e -> {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Open Edge File");
-    fileChooser.setInitialDirectory(new File("src/main/resources/resources")); // Set initial directory to the resources folder
+     menuOpenEdgeFile.setOnAction(e -> {
+      FileChooser fileChooser = new FileChooser();
+      fileChooser.setTitle("Open Edge File");
+      fileChooser.setInitialDirectory(new File("src/main/resources/resources"));
 
-    // Set extension filters
-    FileChooser.ExtensionFilter edgFilter = new FileChooser.ExtensionFilter("EDG files (*.edg)", "*.edg");
-    FileChooser.ExtensionFilter jsonFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
-    FileChooser.ExtensionFilter xmlFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-    fileChooser.getExtensionFilters().addAll(edgFilter, jsonFilter, xmlFilter);
+      FileChooser.ExtensionFilter edgFilter = new FileChooser.ExtensionFilter(
+        "EDG files (*.edg)",
+        "*.edg"
+      );
+      FileChooser.ExtensionFilter jsonFilter = new FileChooser.ExtensionFilter(
+        "JSON files (*.json)",
+        "*.json"
+      );
+      FileChooser.ExtensionFilter xmlFilter = new FileChooser.ExtensionFilter(
+        "XML files (*.xml)",
+        "*.xml"
+      );
+      fileChooser
+        .getExtensionFilters()
+        .addAll(edgFilter, jsonFilter, xmlFilter);
 
-    File selectedFile = fileChooser.showOpenDialog(stage);
-    if (selectedFile != null) {
-        // TODO: Parse the selected file and update the listViewTables
-    }
-});
+      File selectedFile = fileChooser.showOpenDialog(stage);
+      if (selectedFile != null) {
+        try {
+          listViewTables.getItems().clear();
+          List<String> lines = Files.readAllLines(
+            selectedFile.toPath(),
+            StandardCharsets.UTF_8
+          );
+          listViewTables.getItems().addAll(lines);
+        } catch (IOException ex) {
+          ex.printStackTrace();
+          // Handle the exception, e.g., show an error dialog
+        }
+      }
+    });
     // Create Options menu with items
     Menu optionsMenu = new Menu("Options");
     MenuItem menuShowOutput = new MenuItem(
